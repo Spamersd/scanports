@@ -5,6 +5,7 @@ class Hosts {
 
 $ips=@{}
 $dt = @()
+
 foreach($line in Get-Content ".\IN.txt") {
     
     if ($line -notmatch "([0-9]{1,3}[\.]){3}[0-9]{1,3}") {
