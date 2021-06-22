@@ -41,9 +41,11 @@ function GetIPrange {
     (($bytes.Count - 1)..0 | ForEach-Object { [String] $bytes[$_] }) -join "."
 
 }
+
 $ips = @{}
 $dt = @()
 $ListPort = @();
+$ListIP = @();
 
 foreach ($port in Get-Content $PathPortList) {
     if ($port -notmatch "^\d+$") {
@@ -56,40 +58,44 @@ foreach ($port in Get-Content $PathPortList) {
 }
 
 foreach ($line in Get-Content $PathHostList) {
-    if ($line -match "([0-9]{1,3}[\.]){3}[0-9]{1,3}(?=\s|$)") {
-        
-        foreach ($port in  $ListPort) {
-            $myhost = New-Object -TypeName Hosts
-            $myhost.hostIP = $line
-            $myhost.port = $port
-            $dt += $myhost
-        }
-    }
+   
+    $line = $line.Trim().Replace(" ","")
 
-    elseif ($line -match "([0-9]{1,3}[\.]){3}[0-9]{1,3}[\/][0-9]{2}(?=\s|$)") {
-    
+    if ($line -match "([0-9]{1,3}[\.]){3}[0-9]{1,3}[\/][0-9]{2}(?=\s|$)") {
+       
         $net = $line -split "/"
         $ip =[IPAddress]$net[0]
         $mask = [IPAddress](ConvertTo-IPv4MaskString $net[1])
         $net = [IPAddress]($ip.Address -band $mask.Address)
         $broad = [IPAddress]($ip.Address -bor (-bnot [uint]$mask.Address))
-        $list = GetIPrange -start $net.IPAddressToString -stop $broad.IPAddressToString
-        foreach ($ip in $list) {
-            foreach ($port in  $ListPort) {
-                $myhost = New-Object -TypeName Hosts
-                $myhost.hostIP = $ip
-                $myhost.port = $port
-                $dt += $myhost
-            }
-        }
-    }
-    else {
+
+        $ListIP +=  GetIPrange -start $net.IPAddressToString -stop $broad.IPAddressToString
+        
+
+    }elseif ($line -match "([0-9]{1,3}[\.]){3}[0-9]{1,3}[\-]([0-9]{1,3}[\.]){3}[0-9]{1,3}") {
+       
+        $range = $line -split "-"
+        $ListIP +=  GetIPrange -start $range[0] -stop $range[1]
+        
+    }elseif ($line -match "([0-9]{1,3}[\.]){3}[0-9]{1,3}(?=\s|$)" ) {
+    
+        $ListIP += $line
+
+    }else {
     
         $errorLOG += "'$line' is not IP adress" 
         continue           
-    
-    }   
+    }
 } 
+
+foreach ($ip in $ListIP) {
+    foreach ($port in  $ListPort) {
+        $myhost = New-Object -TypeName Hosts
+        $myhost.hostIP = $ip
+        $myhost.port = $port
+        $dt += $myhost
+    }   
+}
 
 $data = $dt | Foreach-Object -Parallel {
     function NetPortTest {
@@ -131,10 +137,16 @@ foreach ($item in $data) {
     } 
 }
 
-
+""
 $errorLOG
+
+""
+"Host`t`tAvailable ports"
 $ips.GetEnumerator() | Sort-Object { [version] $_.Name } | ForEach-Object {"{0}`t{1}" -f $_.Name,($_.Value -join ", ")}
 
+""
 $watch.Stop()
+$strListPort = $ListPort -join ", "
+"Check {0} ports on {1} hosts" -f $strListPort, $ListIP.Count
 "Call request: " + $dt.Count
 "Run time: " + $watch.Elapsed
