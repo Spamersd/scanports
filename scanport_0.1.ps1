@@ -13,28 +13,31 @@ class Hosts {
 
 function GetIPrange {
     param (
-      [string]$start,
-      [string]$stop
+        [string]$start,
+        [string]$stop
     )
     $IP_start = $start -split "\."
     $IP_stop = $stop -split "\."
   
     $ips = @()
     foreach ($okt0 in ($IP_start[0]..$IP_stop[0])) {   
-    foreach ($okt1 in ($IP_start[1]..$IP_stop[1])) {
-    foreach ($okt2 in ($IP_start[2]..$IP_stop[2])) {
-    foreach ($okt3 in ($IP_start[3]..$IP_stop[3])) {
-      $ips += "$okt0.$okt1.$okt2.$okt3"
-    }}}}
+        foreach ($okt1 in ($IP_start[1]..$IP_stop[1])) {
+            foreach ($okt2 in ($IP_start[2]..$IP_stop[2])) {
+                foreach ($okt3 in ($IP_start[3]..$IP_stop[3])) {
+                    $ips += "$okt0.$okt1.$okt2.$okt3"
+                }
+            }
+        }
+    }
     return $ips
     
-  }
+}
 
-  function ConvertTo-IPv4MaskString {
+function ConvertTo-IPv4MaskString {
     param(
-      [Parameter(Mandatory = $true)]
-      [ValidateRange(0, 32)]
-      [Int] $MaskBits
+        [Parameter(Mandatory = $true)]
+        [ValidateRange(0, 32)]
+        [Int] $MaskBits
     )
     $mask = ([Math]::Pow(2, $MaskBits) - 1) * [Math]::Pow(2, (32 - $MaskBits))
     $bytes = [BitConverter]::GetBytes([UInt32] $mask)
@@ -59,29 +62,32 @@ foreach ($port in Get-Content $PathPortList) {
 
 foreach ($line in Get-Content $PathHostList) {
    
-    $line = $line.Trim().Replace(" ","")
+    $line = $line.Trim().Replace(" ", "")
 
     if ($line -match "([0-9]{1,3}[\.]){3}[0-9]{1,3}[\/][0-9]{2}(?=\s|$)") {
        
         $net = $line -split "/"
-        $ip =[IPAddress]$net[0]
+        $ip = [IPAddress]$net[0]
         $mask = [IPAddress](ConvertTo-IPv4MaskString $net[1])
         $net = [IPAddress]($ip.Address -band $mask.Address)
         $broad = [IPAddress]($ip.Address -bor (-bnot [uint]$mask.Address))
 
-        $ListIP +=  GetIPrange -start $net.IPAddressToString -stop $broad.IPAddressToString
+        $ListIP += GetIPrange -start $net.IPAddressToString -stop $broad.IPAddressToString
         
 
-    }elseif ($line -match "([0-9]{1,3}[\.]){3}[0-9]{1,3}[\-]([0-9]{1,3}[\.]){3}[0-9]{1,3}") {
+    }
+    elseif ($line -match "([0-9]{1,3}[\.]){3}[0-9]{1,3}[\-]([0-9]{1,3}[\.]){3}[0-9]{1,3}") {
        
         $range = $line -split "-"
-        $ListIP +=  GetIPrange -start $range[0] -stop $range[1]
+        $ListIP += GetIPrange -start $range[0] -stop $range[1]
         
-    }elseif ($line -match "([0-9]{1,3}[\.]){3}[0-9]{1,3}(?=\s|$)" ) {
+    }
+    elseif ($line -match "([0-9]{1,3}[\.]){3}[0-9]{1,3}(?=\s|$)" ) {
     
         $ListIP += $line
 
-    }else {
+    }
+    else {
     
         $errorLOG += "'$line' is not IP adress" 
         continue           
@@ -142,7 +148,7 @@ $errorLOG
 
 ""
 "Host`t`tAvailable ports"
-$ips.GetEnumerator() | Sort-Object { [version] $_.Name } | ForEach-Object {"{0}`t{1}" -f $_.Name,($_.Value -join ", ")}
+$ips.GetEnumerator() | Sort-Object { [version] $_.Name } | ForEach-Object { "{0}`t{1}" -f $_.Name, ($_.Value -join ", ") }
 
 ""
 $watch.Stop()
