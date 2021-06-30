@@ -1,2 +1,4 @@
 IN.txt
 ports.txt
+OUT.txt
+exec-for-ips.ps1

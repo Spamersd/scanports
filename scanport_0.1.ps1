@@ -20,6 +20,7 @@ function GetIPrange {
     $IP_stop = $stop -split "\."
   
     $ips = @()
+    
     foreach ($okt0 in ($IP_start[0]..$IP_stop[0])) {   
         foreach ($okt1 in ($IP_start[1]..$IP_stop[1])) {
             foreach ($okt2 in ($IP_start[2]..$IP_stop[2])) {
@@ -89,7 +90,7 @@ foreach ($line in Get-Content $PathHostList) {
     }
     else {
     
-        $errorLOG += "'$line' is not IP adress" 
+        $errorLOG += "'$line' is not IP adress/subnet/ip range" 
         continue           
     }
 } 
@@ -102,6 +103,9 @@ foreach ($ip in $ListIP) {
         $dt += $myhost
     }   
 }
+
+$strListPort = $ListPort -join ", "
+"Check ports: {0} on {1} hosts" -f $strListPort, $ListIP.Count
 
 $data = $dt | Foreach-Object -Parallel {
     function NetPortTest {
@@ -152,7 +156,7 @@ $ips.GetEnumerator() | Sort-Object { [version] $_.Name } | ForEach-Object { "{0}
 
 ""
 $watch.Stop()
-$strListPort = $ListPort -join ", "
-"Check {0} ports on {1} hosts" -f $strListPort, $ListIP.Count
+
 "Call request: " + $dt.Count
 "Run time: " + $watch.Elapsed
+$ips.GetEnumerator() | ForEach-Object { $_.Name} | Out-file ./OUT.txt 
