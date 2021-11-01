@@ -4,4 +4,6 @@ OUT.txt
 exec-for-ips.ps1
 input.txt
 output.txt
-test*
+test.ps1
+test2.ps1
+test.py
