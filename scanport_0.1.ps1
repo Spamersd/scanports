@@ -164,4 +164,3 @@ $watch.Stop()
 
 "Call request: " + $dt.Count
 "Run time: " + $watch.Elapsed
-$ips.GetEnumerator() | ForEach-Object { $_.Name} | Out-file ./OUT.txt 
