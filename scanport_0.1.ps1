@@ -52,13 +52,18 @@ $ListPort = @();
 $ListIP = @();
 
 foreach ($port in Get-Content $PathPortList) {
-    if ($port -notmatch "^\d+$") {
-     
-        $errorLOG += "'$port' is not port"
-        continue
-        
+    $port_range = $port.split("-")
+
+    if ($port_range.count -eq 2){
+        foreach ($item in $port_range[0]..$port_range[1] ) {
+            $ListPort += $item
+        } 
     }
-    $ListPort += $port
+    else {
+        $ListPort += $port_range[0]       
+    }
+    
+  
 }
 
 foreach ($line in Get-Content $PathHostList) {
@@ -132,7 +137,7 @@ $data = $dt | Foreach-Object -Parallel {
         
     }
     #tnc $_.hostIP -p $_.port -ErrorAction SilentlyContinue -WarningAction SilentlyContinue # Wery wery slowly
-    NetPortTest -IPaddr $_.hostIP -Port $_.port -Timeout 1000 #wery fast
+    NetPortTest -IPaddr $_.hostIP -Port $_.port -Timeout 300 #wery fast
 } 
 
 foreach ($item in $data) {
