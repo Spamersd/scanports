@@ -136,8 +136,8 @@ $data = $dt | Foreach-Object -Parallel {
         }
         
     }
-    #tnc $_.hostIP -p $_.port -ErrorAction SilentlyContinue -WarningAction SilentlyContinue # Wery wery slowly
-    NetPortTest -IPaddr $_.hostIP -Port $_.port -Timeout 300 #wery fast
+    #tnc $_.hostIP -p $_.port -ErrorAction SilentlyContinue -WarningAction SilentlyContinue # very very slowly
+    NetPortTest -IPaddr $_.hostIP -Port $_.port -Timeout 300 #very fast
 } 
 
 foreach ($item in $data) {
