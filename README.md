@@ -1,12 +1,15 @@
 # scanports
-Простой сканер портов
-В файл `IN.txt` необходимо записать сканируемые адреса следующими форматом:
+A simple port scanner
+In the `IN.txt` file, you need to write scanned addresses in the following format:
 ```
-192.168.0.0/24 - Указать подсеть
-192.168.1.24-192.168.1.44 - указать диапазон 
+192.168.0.0/24 - Subnet
+192.168.1.24-192.168.1.44 - IP range
 192.168.2.3
 192.168.2.5
 192.168.2.8
-192.168.2.9 - или отдельные адреса
+192.168.2.9 - or ip Adresses
 ```
-в фале `ports.txt` указываются порты для сканирования кажды порт с новы строки, либо диапазон портов
+the `ports.txt` file specifies the ports to scan each port on a new line, or a range of ports
+80
+443
+1000-1200
