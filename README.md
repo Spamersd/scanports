@@ -1,4 +1,4 @@
-# scanports
+# scanports A simple port scanner
 A simple port scanner
 In the `IN.txt` file, you need to write scanned addresses in the following format:
 ```
